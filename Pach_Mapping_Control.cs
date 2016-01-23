@@ -65,9 +65,9 @@ namespace Pachyderm_Acoustic
                 if (plugin.Save_Results())
                 {
                     SaveFileDialog sf = new System.Windows.Forms.SaveFileDialog();
-                    sf.DefaultExt = ".csv";
+                    sf.DefaultExt = ".pachm";
                     sf.AddExtension = true;
-                    sf.Filter = "Pachyderm Mapping Data File (*.csv)|*.csv|" + "All Files|";
+                    sf.Filter = "Pachyderm Mapping Data File (*.pachm)|*.pachm|" + "All Files|";
                     if (sf.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                     {
                         SavePath = sf.FileName;

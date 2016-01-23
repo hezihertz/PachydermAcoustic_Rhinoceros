@@ -269,9 +269,8 @@ namespace Pachyderm_Acoustic
                 sw.WriteLine("Mesh Information:");
                 //6. Announce Mesh Vertices (string)
                 sw.WriteLine("Mesh Vertices:");
-                //Write the number of vertices & faces (int) (int)
+                //Write the number of vertices (int) (int)
                 sw.WriteLine((UInt32)Rec_List[0].Map_Mesh.Vertices.Count);
-                sw.WriteLine((UInt32)Rec_List[0].Map_Mesh.Faces.Count);
 
                 for (int i = 0; i < Rec_List[0].Map_Mesh.Vertices.Count; i++)
                 {
@@ -287,6 +286,9 @@ namespace Pachyderm_Acoustic
                 }
                 //7. Announce Mesh Faces (string)
                 sw.WriteLine("Mesh Faces:");
+                // Write the number of faces 
+                sw.WriteLine((UInt32)Rec_List[0].Map_Mesh.Faces.Count);
+
                 for (int i = 0; i < Rec_List[0].Map_Mesh.Faces.Count; i++)
                 {
                     // Write mesh vertex indices: (int) (int) (int) (int)
@@ -313,29 +315,23 @@ namespace Pachyderm_Acoustic
                     sw.WriteLine(Rec_List[i].Src.X);
                     sw.WriteLine(Rec_List[i].Src.Y);
                     sw.WriteLine(Rec_List[i].Src.Z);
-                    ///////////////////////
+                    //////////////////////*/
+                    sw.WriteLine(Helper_Functions.ConvertToCSVString(Rec_List[i].Src.X, Rec_List[i].Src.Y, Rec_List[i].Src.Z);
                     sw.WriteLine(Rec_List[i].SrcType);
-                    sw.WriteLine(Rec_List[i].delay_ms);//v.2.0.0.1*/
-                    string receiverattribute = Helper_Functions.ConvertToCSVString(
-                        Rec_List[i].Src.X,
-                        Rec_List[i].Src.Y,
-                        Rec_List[i].Src.Z,
-                        Rec_List[i].SrcType,
-                        Rec_List[i].delay_ms);
-                    sw.WriteLine(receiverattribute);
+                    sw.WriteLine(Rec_List[i].delay_ms);//v.2.0.0.1
                 }
 
                 //8. Announce that the following data pertains to the receiver histograms (string)
                 sw.WriteLine("Receiver Hit Data:");
                 //8a. Announce whether or not data is linked to vertices rather than faces (bool)
                 sw.WriteLine(Rec_List[0].Rec_Vertex);
-
+                // this part need to be rewritten for readability//
                 for (int s = 0; s < Rec_List.Length; s++)
                 {
                     for (int i = 0; i < Rec_Ct; i++)
                     {
                         //Write Receiver Index (int)
-                        sw.WriteLine("Receiver Indes:");
+                        sw.WriteLine("Receiver Index:");
                         sw.WriteLine((UInt32)i);
                         //Write the direct sound arrival time.
                         sw.WriteLine("Direct Sound Arrival Time:");
@@ -349,11 +345,11 @@ namespace Pachyderm_Acoustic
                             //Write Octave (int)
                             sw.WriteLine("Octave band:");
                             sw.WriteLine((UInt32)Octave);
+                            //Write each energy value in the histogram (double)...
+                            sw.WriteLine("energy level of each receiver:");
                             double[] Hist = Rec_List[s].Rec_List[i].GetEnergyHistogram(Octave);
                             for (int e = 0; e < Rec_List[s].SampleCT; e++)
                             {
-                                //Write each energy value in the histogram (double)...
-                                sw.WriteLine("energy level of each receiver:");
                                 sw.WriteLine(Helper_Functions.ConvertToCSVString((UInt32)e, (Hist[e])));
                                 //Write each directional value in the histogram (double) (double) (double);
                                 if (Directional)
