@@ -316,7 +316,7 @@ namespace Pachyderm_Acoustic
                     sw.WriteLine(Rec_List[i].Src.Y);
                     sw.WriteLine(Rec_List[i].Src.Z);
                     //////////////////////*/
-                    sw.WriteLine(Helper_Functions.ConvertToCSVString(Rec_List[i].Src.X, Rec_List[i].Src.Y, Rec_List[i].Src.Z);
+                    sw.WriteLine(Helper_Functions.ConvertToCSVString(Rec_List[i].Src.X, Rec_List[i].Src.Y, Rec_List[i].Src.Z));
                     sw.WriteLine(Rec_List[i].SrcType);
                     sw.WriteLine(Rec_List[i].delay_ms);//v.2.0.0.1
                 }
