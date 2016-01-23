@@ -247,7 +247,7 @@ namespace Pachyderm_Acoustic
             public static void Write_pachm(string filename, ref Mapping.PachMapReceiver[] Rec_List)
             {
                 // use Streamwriter to write to csv files 
-                System.IO.StreamWriter sw = new System.IO.StreamWriter(filename);
+                System.IO.StreamWriter sw = System.IO.File.CreateText(filename);
                 //1. Write calculation type. (string)  
                 sw.WriteLine("Calculation Tyle:");
                 sw.WriteLine(Rec_List[0].Data_Type());
