@@ -241,7 +241,7 @@ namespace Pachyderm_Acoustic
                         Recs[q] = PachTools.RPttoHPt(R[q]);
                     }
 
-                    if (SavePath != null) Utilities.FileIO.Write_Pac1(SavePath, Direct_Data, IS_Data, Receiver);
+                    if (SavePath != null) Utilities.FileIO.Write_Pac1(SavePath, ref Direct_Data, ref IS_Data, ref Receiver);
 
                     OpenAnalysis();
                     cleanup();
@@ -1806,7 +1806,8 @@ namespace Pachyderm_Acoustic
         #region ToolstripMenuItems
             private void SaveDataToolStripMenuItem_Click(object sender, EventArgs e)
             {
-                Write_File();
+                Utilities.FileIO.Write_Pac1(ref Direct_Data, ref IS_Data, ref Receiver);
+                //Write_File();
             }
 
             private void OpenDataToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1838,6 +1839,11 @@ namespace Pachyderm_Acoustic
             private void Auralisation_Click(object sender, EventArgs e)
             {
                 Rhino.RhinoApp.RunScript("PachyDerm_Auralisation", false);
+            }
+
+            private void LayerDisplay_SelectedIndexChanged(object sender, EventArgs e)
+            {
+
             }
         }
     }

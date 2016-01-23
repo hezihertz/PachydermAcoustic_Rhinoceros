@@ -169,106 +169,54 @@ namespace Pachyderm_Acoustic
             /// this method saves a completed receiver bank to memory.
             /// </summary>
             /// <param name="BW">the binary writer used to copy data to disk.</param>
-            public void Write_Data(ref System.IO.BinaryWriter BW)
+            public void Write_Data(ref System.IO.StreamWriter BW)
             {
-                //1. Write an indicator to signify that there is ray traced data: BOOL
-                BW.Write("Ray-Traced_Data");
+                //1. Write an indicator to signify that there is ray traced data
+                BW.WriteLine("Ray-Traced_Data");
 
                 //2. Write the type of receivers used
-                BW.Write((int)Rec_Type);
+                BW.WriteLine("Type of receivers (int)");
+                BW.WriteLine((int)Rec_Type);
 
                 //3. Write the sample rate:int
-                BW.Write(SampleRate);
+                BW.WriteLine("Sample Rate");
+                BW.WriteLine(SampleRate);
 
                 //4. Write the number of samples:int
-                BW.Write(SampleCT);
+                BW.WriteLine("Number of Samples");
+                BW.WriteLine(SampleCT);
 
                 //5. Write the Speed of Sound:double (deprecated as of v.1.6)
                 //BW.Write(343.0d);
 
                 //6. Write the cut off time:double
-                BW.Write(CutOffTime);
+                BW.WriteLine("Cut off time");
+                BW.WriteLine(CutOffTime);
 
                 for (int q = 0; q < Rec_List.Length; q++)
                 {
                     //7a. Write the Speed of Sound for this receiver: double
-                    BW.Write(Rec_List[q].Sound_Speed);
-
-                    double[] Hist0 = Rec_List[q].GetEnergyHistogram(0);
-                    double[] Hist1 = Rec_List[q].GetEnergyHistogram(1);
-                    double[] Hist2 = Rec_List[q].GetEnergyHistogram(2);
-                    double[] Hist3 = Rec_List[q].GetEnergyHistogram(3);
-                    double[] Hist4 = Rec_List[q].GetEnergyHistogram(4);
-                    double[] Hist5 = Rec_List[q].GetEnergyHistogram(5);
-                    double[] Hist6 = Rec_List[q].GetEnergyHistogram(6);
-                    double[] Hist7 = Rec_List[q].GetEnergyHistogram(7);
+                    BW.WriteLine("Speed of Sound for this receiver");
+                    BW.WriteLine(Rec_List[q].Sound_Speed);
 
                     for (int j = 0; j < SampleCT; j++)
                     {
-                        //7b. Write the echogram sample and directional sample:(double + 3double) * 8
-                        BW.Write(Hist0[j]);                        
-                        BW.Write(Rec_List[q].Directions_Pos(0, j, 0));
-                        BW.Write(Rec_List[q].Directions_Pos(0, j, 1));
-                        BW.Write(Rec_List[q].Directions_Pos(0, j, 2));
-                        BW.Write(Rec_List[q].Directions_Neg(0, j, 0));
-                        BW.Write(Rec_List[q].Directions_Neg(0, j, 1));
-                        BW.Write(Rec_List[q].Directions_Neg(0, j, 2));
-
-                        BW.Write(Hist1[j]);
-                        BW.Write(Rec_List[q].Directions_Pos(1, j, 0));
-                        BW.Write(Rec_List[q].Directions_Pos(1, j, 1));
-                        BW.Write(Rec_List[q].Directions_Pos(1, j, 2));
-                        BW.Write(Rec_List[q].Directions_Neg(1, j, 0));
-                        BW.Write(Rec_List[q].Directions_Neg(1, j, 1));
-                        BW.Write(Rec_List[q].Directions_Neg(1, j, 2));
-
-                        BW.Write(Hist2[j]);
-                        BW.Write(Rec_List[q].Directions_Pos(2, j, 0));
-                        BW.Write(Rec_List[q].Directions_Pos(2, j, 1));
-                        BW.Write(Rec_List[q].Directions_Pos(2, j, 2));
-                        BW.Write(Rec_List[q].Directions_Neg(2, j, 0));
-                        BW.Write(Rec_List[q].Directions_Neg(2, j, 1));
-                        BW.Write(Rec_List[q].Directions_Neg(2, j, 2));
-
-                        BW.Write(Hist3[j]);
-                        BW.Write(Rec_List[q].Directions_Pos(3, j, 0));
-                        BW.Write(Rec_List[q].Directions_Pos(3, j, 1));
-                        BW.Write(Rec_List[q].Directions_Pos(3, j, 2));
-                        BW.Write(Rec_List[q].Directions_Neg(3, j, 0));
-                        BW.Write(Rec_List[q].Directions_Neg(3, j, 1));
-                        BW.Write(Rec_List[q].Directions_Neg(3, j, 2));
-
-                        BW.Write(Hist4[j]);
-                        BW.Write(Rec_List[q].Directions_Pos(4, j, 0));
-                        BW.Write(Rec_List[q].Directions_Pos(4, j, 1));
-                        BW.Write(Rec_List[q].Directions_Pos(4, j, 2));
-                        BW.Write(Rec_List[q].Directions_Neg(4, j, 0));
-                        BW.Write(Rec_List[q].Directions_Neg(4, j, 1));
-                        BW.Write(Rec_List[q].Directions_Neg(4, j, 2));
-
-                        BW.Write(Hist5[j]);
-                        BW.Write(Rec_List[q].Directions_Pos(5, j, 0));
-                        BW.Write(Rec_List[q].Directions_Pos(5, j, 1));
-                        BW.Write(Rec_List[q].Directions_Pos(5, j, 2));
-                        BW.Write(Rec_List[q].Directions_Neg(5, j, 0));
-                        BW.Write(Rec_List[q].Directions_Neg(5, j, 1));
-                        BW.Write(Rec_List[q].Directions_Neg(5, j, 2));
-
-                        BW.Write(Hist6[j]);
-                        BW.Write(Rec_List[q].Directions_Pos(6, j, 0));
-                        BW.Write(Rec_List[q].Directions_Pos(6, j, 1));
-                        BW.Write(Rec_List[q].Directions_Pos(6, j, 2));
-                        BW.Write(Rec_List[q].Directions_Neg(6, j, 0));
-                        BW.Write(Rec_List[q].Directions_Neg(6, j, 1));
-                        BW.Write(Rec_List[q].Directions_Neg(6, j, 2));
-
-                        BW.Write(Hist7[j]);
-                        BW.Write(Rec_List[q].Directions_Pos(7, j, 0));
-                        BW.Write(Rec_List[q].Directions_Pos(7, j, 1));
-                        BW.Write(Rec_List[q].Directions_Pos(7, j, 2));
-                        BW.Write(Rec_List[q].Directions_Neg(7, j, 0));
-                        BW.Write(Rec_List[q].Directions_Neg(7, j, 1));
-                        BW.Write(Rec_List[q].Directions_Neg(7, j, 2));
+                        BW.WriteLine("Sample" + j);
+                        for (int k = 0; k < 8; k++)
+                        {
+                            //7b. Write the echogram sample and directional sample:(double + 3double) * 8
+                            BW.WriteLine("Echogram sample and directional sample");
+                            double[] Hist = Rec_List[q].GetEnergyHistogram(k);
+                            string sample_str = Helper_Functions.ConvertToCSVString(
+                                Hist[j],
+                                Rec_List[q].Directions_Pos(k, j, 0),
+                                Rec_List[q].Directions_Pos(k, j, 1),
+                                Rec_List[q].Directions_Pos(k, j, 2),
+                                Rec_List[q].Directions_Neg(k, j, 0),
+                                Rec_List[q].Directions_Neg(k, j, 1),
+                                Rec_List[q].Directions_Neg(k, j, 2));
+                            BW.WriteLine(sample_str);
+                        }
                     }
                 }
             }

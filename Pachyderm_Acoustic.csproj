@@ -119,6 +119,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Auralisation_Conduit.cs" />
+    <Compile Include="helper_functions.cs" />
     <Compile Include="Pach_SP_IIR.cs" />
     <Compile Include="Classes_Absorption_Matrices.cs" />
     <Compile Include="Classes_Compact_FDTD.cs" />

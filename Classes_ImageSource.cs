@@ -1011,17 +1011,21 @@ namespace Pachyderm_Acoustic
         /// Write the image source paths to a file for storage.
         /// </summary>
         /// <param name="BW">The binary writer to which data will be written.</param>
-        public void Write_Data(ref System.IO.BinaryWriter BW)
+        public void Write_Data(ref System.IO.StreamWriter BW)
         {
             //1. Write an indicator to signify that there is image source data
-            BW.Write("Image-Source_Data");
+            BW.WriteLine("Image-Source_Data");
 
             for (int q = 0; q < ValidPaths.Length; q++)
             {
                 //2. Write the receiver number:int
-                BW.Write(q);
+                BW.WriteLine("Number of Receivers");
+                BW.WriteLine(q);
+
                 //3. Write number of paths:int
-                BW.Write(ValidPaths[q].Count);
+                BW.WriteLine("Number of Paths");
+                BW.WriteLine(ValidPaths[q].Count);
+
                 //Write for all specular paths...
                 //TODO: Sort for Specular Paths, filter out Compound Paths.
                 for (int i = 0; i < ValidPaths[q].Count; i++)
@@ -1032,45 +1036,58 @@ namespace Pachyderm_Acoustic
                     if (ValidPaths[q][i] is Specular_Path) 
                     {
                         ///Specular Path:
-                        BW.Write((short)0);
+                        BW.WriteLine("Specular Path");
+                        BW.WriteLine((short)0);
 
                         //4. Write the number of reflection path points
-                        BW.Write(ValidPaths[q][i].Path[0].Length);
+                        BW.WriteLine("The Number of Reflection Path Points");
+                        BW.WriteLine(ValidPaths[q][i].Path[0].Length);
+
                         //5. Write the reflection path:double
+                        BW.WriteLine("Reflection Path (X Y Z)");
                         for (int r = 0; r < ValidPaths[q][i].Path[0].Length; r++)
                         {
-                            BW.Write(ValidPaths[q][i].Path[0][r].x);
-                            BW.Write(ValidPaths[q][i].Path[0][r].y);
-                            BW.Write(ValidPaths[q][i].Path[0][r].z);
+                            string reflection_path = Helper_Functions.ConvertToCSVString(
+                                ValidPaths[q][i].Path[0][r].x,
+                                ValidPaths[q][i].Path[0][r].y,
+                                ValidPaths[q][i].Path[0][r].z);
+                            BW.WriteLine(reflection_path);
                         }
-                        
+
                         //6a.1 Write the energy levels
-                        BW.Write(ValidPaths[q][i].Energy(0)[0]);
-                        BW.Write(ValidPaths[q][i].Energy(1)[0]);
-                        BW.Write(ValidPaths[q][i].Energy(2)[0]);
-                        BW.Write(ValidPaths[q][i].Energy(3)[0]);
-                        BW.Write(ValidPaths[q][i].Energy(4)[0]);
-                        BW.Write(ValidPaths[q][i].Energy(5)[0]);
-                        BW.Write(ValidPaths[q][i].Energy(6)[0]);
-                        BW.Write(ValidPaths[q][i].Energy(7)[0]);
+                        BW.WriteLine("Energy Levels");
+                        string energy_levels = Helper_Functions.ConvertToCSVString(
+                            ValidPaths[q][i].Energy(0)[0],
+                            ValidPaths[q][i].Energy(1)[0],
+                            ValidPaths[q][i].Energy(2)[0],
+                            ValidPaths[q][i].Energy(3)[0],
+                            ValidPaths[q][i].Energy(4)[0],
+                            ValidPaths[q][i].Energy(5)[0],
+                            ValidPaths[q][i].Energy(6)[0],
+                            ValidPaths[q][i].Energy(7)[0]);
+                        BW.WriteLine(energy_levels);
 
                         //6a.2 Write a bool for whether it has a special materials filter...
+                        BW.WriteLine("Boolean to determine whether or not it has a special materials filter");
                         if ((ValidPaths[q][i] as Specular_Path).Special_Filter != null)
                         {
-                            BW.Write(true);
-                            BW.Write((ValidPaths[q][i] as Specular_Path).Special_Filter.Length);
-                            foreach(System.Numerics.Complex val in (ValidPaths[q][i] as Specular_Path).Special_Filter)
-                            {
-                                BW.Write(val.Real);
-                                BW.Write(val.Imaginary);
-                            }
+                            BW.WriteLine(true);
+                            BW.WriteLine("Special_Filter Length");
+                            BW.WriteLine((ValidPaths[q][i] as Specular_Path).Special_Filter.Length);
+
+                            BW.WriteLine("Real, Imaginary");
+                            foreach (System.Numerics.Complex val in (ValidPaths[q][i] as Specular_Path).Special_Filter)
+                                BW.WriteLine(Helper_Functions.ConvertToCSVString(val.Real, val.Imaginary));
                         }
                         else
                         {
-                            BW.Write(false);
+                            BW.WriteLine(false);
                         }
+
+                        BW.WriteLine("prms");
                         double[] prms = (ValidPaths[q][i] as Specular_Path).prms;
-                        for (int j = 0; j < prms.Length; j++) BW.Write(prms[j]);
+                        for (int j = 0; j < prms.Length; j++)
+                            BW.WriteLine(prms[j]);
                     }
                     else if (ValidPaths[q][i] is Compound_Path)
                     {
@@ -1092,14 +1109,14 @@ namespace Pachyderm_Acoustic
                         //}
                     }
 
-                    //7. Write the arrival time:double
-                    BW.Write(ValidPaths[q][i].TravelTime);
+                    //7. Write the Travel time:double
+                    BW.WriteLine("Travel Time (double)");
+                    BW.WriteLine(ValidPaths[q][i].TravelTime);
 
                     //8. Write the Reflection Sequence:int
+                    BW.WriteLine("Reflection Sequence");
                     for (int r = 0; r < ValidPaths[q][i].Reflection_Sequence.Length; r++)
-                    {
-                        BW.Write(ValidPaths[q][i].Reflection_Sequence[r]);
-                    }
+                        BW.WriteLine(ValidPaths[q][i].Reflection_Sequence[r]);
                 }
             }
         }

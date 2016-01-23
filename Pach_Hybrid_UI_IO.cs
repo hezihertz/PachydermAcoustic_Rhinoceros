@@ -36,12 +36,12 @@ namespace Pachyderm_Acoustic
                 }
 
                 System.Windows.Forms.SaveFileDialog sf = new System.Windows.Forms.SaveFileDialog();
-                sf.DefaultExt = ".pac1";
+                sf.DefaultExt = ".csv";
                 sf.AddExtension = true;
-                sf.Filter = "Pachyderm Ray Data file (*.pac1)|*.pac1|" + "All Files|";
+                sf.Filter = "Pachyderm Ray Data file (*.csv)|*.csv|" + "All Files|";
                 if (sf.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    System.IO.BinaryWriter sw = new System.IO.BinaryWriter(System.IO.File.Open(sf.FileName, System.IO.FileMode.Create));
+                    System.IO.StreamWriter sw = new System.IO.StreamWriter(System.IO.File.Open(sf.FileName, System.IO.FileMode.Create));
                     //1. Date & Time
                     sw.Write(System.DateTime.Now.ToString());
                     //2. Plugin Version... if less than 1.1, assume only 1 source.

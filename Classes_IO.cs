@@ -24,23 +24,22 @@ namespace Pachyderm_Acoustic
     {
         public class FileIO
         {
-
             /// <summary>
             /// Writes a Pac1 file. [Useable by scripts and interface components alike.]
             /// </summary>
             /// <param name="Direct_Data">Array of Completed Direct Sound Simulations Required</param>
             /// <param name="IS_Data">Array of Completed Image Source Simulations. Enter null if opted out.</param>
             /// <param name="Receiver">Array of Completed Ray-Tracing Simulation Receivers. Enter null if opted out.</param>
-            public static void Write_Pac1(Direct_Sound[] Direct_Data, ImageSourceData[] IS_Data = null, Environment.Receiver_Bank[] Receiver = null)
+            public static void Write_Pac1(ref Direct_Sound[] Direct_Data, ref ImageSourceData[] IS_Data, ref Environment.Receiver_Bank[] Receiver)
             {
                 System.Windows.Forms.SaveFileDialog sf = new System.Windows.Forms.SaveFileDialog();
-                sf.DefaultExt = ".pac1";
+                sf.DefaultExt = ".csv";
                 sf.AddExtension = true;
-                sf.Filter = "Pachyderm Ray Data file (*.pac1)|*.pac1|" + "All Files|";
+                sf.Filter = "Pachyderm Ray Data file (*.csv)|*.csv|" + "All Files|";
 
                 if (sf.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    Write_Pac1(sf.FileName, Direct_Data, IS_Data, Receiver);
+                    Write_Pac1(sf.FileName, ref Direct_Data, ref IS_Data, ref Receiver);
                 }
             }
 
@@ -51,48 +50,58 @@ namespace Pachyderm_Acoustic
             /// <param name="Direct_Data">Array of Completed Direct Sound Simulations Required</param>
             /// <param name="IS_Data">Array of Completed Image Source Simulations. Enter null if opted out.</param>
             /// <param name="Receiver">Array of Completed Ray-Tracing Simulation Receivers. Enter null if opted out.</param>
-            public static void Write_Pac1(string filename, Direct_Sound[] Direct_Data, ImageSourceData[] IS_Data = null, Environment.Receiver_Bank[] Receiver = null)
+            public static void Write_Pac1(string filename, ref Direct_Sound[] Direct_Data, ref ImageSourceData[] IS_Data, ref Environment.Receiver_Bank[] Receiver)
             {
                 if (Direct_Data == null && IS_Data == null && IS_Data == null && Receiver != null)
                 {
                     System.Windows.Forms.MessageBox.Show("There is no simulated data to save.");
                     return;
                 }
-
+                
                 Pachyderm_Acoustic.UI.PachydermAc_PlugIn plugin = Pachyderm_Acoustic.UI.PachydermAc_PlugIn.Instance;
 
-                System.IO.BinaryWriter sw = new System.IO.BinaryWriter(System.IO.File.Open(filename, System.IO.FileMode.Create));
+                //use StreamWriter to write to csv files
+                System.IO.StreamWriter sw = System.IO.File.CreateText(filename);
+
                 //1. Date & Time
-                sw.Write(System.DateTime.Now.ToString());
+                sw.WriteLine("Current Date and Time");
+                sw.WriteLine(System.DateTime.Now.ToString());
+
                 //2. Plugin Version... if less than 1.1, assume only 1 source.
-                sw.Write(plugin.Version);
+                sw.WriteLine("Plugin Version");
+                sw.WriteLine(plugin.Version);
+
                 //3. Cut off Time (seconds) and SampleRate
-                sw.Write((double)Receiver[0].CO_Time);//CO_TIME.Value);
-                sw.Write(Receiver[0].SampleRate);
+                sw.WriteLine("Cut off Time");
+                sw.WriteLine((double)Receiver[0].CO_Time);//CO_TIME.Value);
+                sw.WriteLine("Sample Rate");
+                sw.WriteLine(Receiver[0].SampleRate);
+
                 //4.0 Source Count(int)
                 Rhino.Geometry.Point3d[] SRC;
                 plugin.SourceOrigin(out SRC);
-                sw.Write(SRC.Length);
+                sw.WriteLine("Source Count");
+                sw.WriteLine(SRC.Length);
+
+                //4 Source Location x,y,z (double)
+                sw.WriteLine("Source Location : x y z");
                 for (int i = 0; i < SRC.Length; i++)
-                {
-                    //4.1 Source Location x (double)    
-                    sw.Write(SRC[i].X);
-                    //4.2 Source Location y (double)
-                    sw.Write(SRC[i].Y);
-                    //4.3 Source Location z (double)
-                    sw.Write(SRC[i].Z);
-                }
+                    sw.WriteLine(Helper_Functions.ConvertToCSVString(SRC[i].X, SRC[i].Y, SRC[i].Z));
+
                 //5. No of Receivers
-                sw.Write(Receiver[0].Rec_List.Length);
+                sw.WriteLine("Number of Receivers");
+                sw.WriteLine(Receiver[0].Rec_List.Length);
 
                 //6. Write the coordinates of each receiver point
                 //6b. Write the environmental characteristics at each receiver point (Rho * C); V2.0 only...
                 for (int q = 0; q < Receiver[0].Rec_List.Length; q++)
                 {
-                    sw.Write(Receiver[0].Rec_List[q].H_Origin.x);
-                    sw.Write(Receiver[0].Rec_List[q].H_Origin.y);
-                    sw.Write(Receiver[0].Rec_List[q].H_Origin.z);
-                    sw.Write(Receiver[0].Rec_List[q].Rho_C);
+                    string origin_and_rhoC = Helper_Functions.ConvertToCSVString(
+                        Receiver[0].Rec_List[q].H_Origin.x,
+                        Receiver[0].Rec_List[q].H_Origin.y,
+                        Receiver[0].Rec_List[q].H_Origin.z,
+                        Receiver[0].Rec_List[q].Rho_C);
+                    sw.WriteLine(origin_and_rhoC);
                 }
 
                 for (int s = 0; s < SRC.Length; s++)

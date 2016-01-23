@@ -53,50 +53,63 @@ namespace Pachyderm_Acoustic
         /// This method copies the direct sound information to an open, writeable binary stream.
         /// </summary>
         /// <param name="BW">The Binary Writer to which the direct sound will be written.</param>
-        public void Write_Data(ref System.IO.BinaryWriter BW)
+        public void Write_Data(ref System.IO.StreamWriter BW)
         {
             //1. Write an indicator to signify that there is direct sound data
-            BW.Write("Direct_Sound w sourcedata");
-
+            BW.WriteLine("Direct_Sound w sourcedata");
             //2. Write strength reference data
             //Deprecated at V 2.0.
-            
-            //2.1 Write source data - type and SWL
+
+            //2.1 Write source data - type
+            BW.WriteLine("Type");
             BW.Write(type); //string (delimited by Colons.)
+
+            //2.2 Write source data - SWL (double)
             for (int o = 0; o < SWL.Length; o++)
             {
-                BW.Write(SWL[o]); //double
+                BW.WriteLine(SWL[o]);
             }
-            BW.Write(Delay_ms);
 
+            //2.3 Write delay_ms
+            BW.WriteLine("Delay in ms");
+            BW.WriteLine(Delay_ms);
+
+            BW.WriteLine("Receivers");
             for (int q = 0; q < Receiver.Count; q++)
             {
-                //2.2 Write number of Source Pts (No_of_pts).
+                //2.4 Write number of Source Pts (No_of_pts).
                 //if (Duration_ms > 1) { BW.Write(Duration_ms); }
-                BW.Write(Io[q][0].Length);
+                BW.WriteLine("Io[q][0].Length");
+                BW.WriteLine(Io[q][0].Length);
 
                 //3. Write the validity of the direct sound
-                BW.Write(Validity[q]);
+                BW.WriteLine("Validity");
+                BW.WriteLine(Validity[q]);
+
                 //4. Write the Time point
-                BW.Write(Time(q));
+                BW.WriteLine("Time Point");
+                BW.WriteLine(Time(q));
                 for (int time = 0; time < Io[q][0].Length; time++)
                 {
-                    //5. Write all Energy data
-                    BW.Write(Io[q][0][time]);
-                    BW.Write(Io[q][1][time]);
-                    BW.Write(Io[q][2][time]);
-                    BW.Write(Io[q][3][time]);
-                    BW.Write(Io[q][4][time]);
-                    BW.Write(Io[q][5][time]);
-                    BW.Write(Io[q][6][time]);
-                    BW.Write(Io[q][7][time]);
+                    //5. Write all Energy data 
+                    string energy = Helper_Functions.ConvertToCSVString(
+                        Io[q][0][time],
+                        Io[q][1][time],
+                        Io[q][2][time],
+                        Io[q][3][time],
+                        Io[q][4][time],
+                        Io[q][5][time],
+                        Io[q][6][time],
+                        Io[q][7][time]);
+                    BW.WriteLine(energy);
 
                     //5c. Write all directional data
-                    for (int oct = 0; oct < 8; oct++) for (int dir = 0; dir < 3; dir++)
-                        {
-                            BW.Write(Dir_Rec_Pos[q][oct][time][dir]);
-                            BW.Write(Dir_Rec_Neg[q][oct][time][dir]);
-                        }
+                    BW.WriteLine("Direction (array0-7 dimension0-2 positive/negative)");
+                    for (int oct = 0; oct < 8; oct++)
+                        for (int dir = 0; dir < 3; dir++)
+                            BW.WriteLine(Helper_Functions.ConvertToCSVString(
+                                    Dir_Rec_Pos[q][oct][time][dir],
+                                    Dir_Rec_Neg[q][oct][time][dir]));
                 }
             }
         }
