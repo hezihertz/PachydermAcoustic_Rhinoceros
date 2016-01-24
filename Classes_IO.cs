@@ -324,46 +324,38 @@ namespace Pachyderm_Acoustic
                 //8. Announce that the following data pertains to the receiver histograms (string)
                 sw.WriteLine("Receiver Hit Data:");
                 //8a. Announce whether or not data is linked to vertices rather than faces (bool)
+                sw.WriteLine("True: data is linked to vertices; False:data is linked to faces;");
                 sw.WriteLine(Rec_List[0].Rec_Vertex);
                 // this part need to be rewritten for readability//
                 for (int s = 0; s < Rec_List.Length; s++)
                 {
                     for (int i = 0; i < Rec_Ct; i++)
                     {
-                        //Write Receiver Index (int)
-                        sw.WriteLine("Receiver Index:");
-                        sw.WriteLine((UInt32)i);
-                        //Write the direct sound arrival time.
-                        sw.WriteLine("Direct Sound Arrival Time:");
-                        sw.WriteLine((Rec_List[s].Rec_List[i] as Mapping.PachMapReceiver.Map_Receiver).Direct_Time);
-                        //Write Impedance of Air
-                        sw.WriteLine("Air Impedance:");
-                        sw.WriteLine(Rec_List[0].Rec_List[i].Rho_C);
+                        //Write Receiver Index (int), direct sound arrival time,Impedance of Air
+                        sw.WriteLine("Receiver Index, Direct Sound Arrival Time, Air Impedance:");
+                        sw.WriteLine(Helper_Functions.ConvertToCSVString((UInt32)i, (Rec_List[s].Rec_List[i] as Mapping.PachMapReceiver.Map_Receiver).Direct_Time, Rec_List[0].Rec_List[i].Rho_C));
 
                         for (int Octave = 0; Octave < 8; Octave++)
                         {
-                            //Write Octave (int)
-                            sw.WriteLine("Octave band:");
-                            sw.WriteLine((UInt32)Octave);
-                            //Write each energy value in the histogram (double)...
-                            sw.WriteLine("energy level of each receiver:");
                             double[] Hist = Rec_List[s].Rec_List[i].GetEnergyHistogram(Octave);
+                            sw.WriteLine("Octave band; energy level of each receiver:");
+                            //directional or not directional
                             for (int e = 0; e < Rec_List[s].SampleCT; e++)
                             {
-                                sw.WriteLine(Helper_Functions.ConvertToCSVString((UInt32)e, (Hist[e])));
-                                //Write each directional value in the histogram (double) (double) (double);
                                 if (Directional)
                                 {
+                                    //Write octave band (int); each directional value in the histogram (double) (double) (double), and each energy value in the histogram (double)
                                     Hare.Geometry.Vector DirPos = Rec_List[s].Directions_Pos(Octave, e, i);
-                                    Hare.Geometry.Vector DirNeg = Rec_List[s].Directions_Neg(Octave, e, i); 
-                                    /*sw.WriteLine(DirPos.x);
-                                    sw.WriteLine(DirPos.y);
-                                    sw.WriteLine(DirPos.z);
-                                    sw.WriteLine(DirNeg.x);
-                                    sw.WriteLine(DirNeg.y);
-                                    sw.WriteLine(DirNeg.z);*/
-                                    sw.WriteLine(Helper_Functions.ConvertToCSVString(DirPos.x, DirPos.y, DirPos.z));
-                                    sw.WriteLine(Helper_Functions.ConvertToCSVString(DirNeg.x, DirNeg.y, DirNeg.z));
+                                    Hare.Geometry.Vector DirNeg = Rec_List[s].Directions_Neg(Octave, e, i);
+                                    sw.Write(Helper_Functions.ConvertToCSVString((UInt32)Octave, (Hist[e])));
+                                    sw.WriteLine(Helper_Functions.ConvertToCSVString(
+                                        DirPos.x, DirPos.y, DirPos.z,
+                                        DirNeg.x, DirNeg.y, DirNeg.z));
+                                }
+                                else
+                                {
+                                    //Write Octave (int) & each energy value in the histogram (double)...
+                                    sw.WriteLine(Helper_Functions.ConvertToCSVString((UInt32)Octave, (Hist[e])));
                                 }
                             }
                         }
