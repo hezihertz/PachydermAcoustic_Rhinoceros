@@ -372,8 +372,8 @@ namespace Pachyderm_Acoustic
                                         }
                                     }
                                 }
-                                sw.WriteLine(temp);
                             }
+                            sw.WriteLine(temp);
                         }
                         sw.WriteLine("End_Receiver_Hits");
                     }
