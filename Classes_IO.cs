@@ -335,28 +335,44 @@ namespace Pachyderm_Acoustic
                         sw.WriteLine("Receiver Index, Direct Sound Arrival Time, Air Impedance:");
                         sw.WriteLine(Helper_Functions.ConvertToCSVString((UInt32)i, (Rec_List[s].Rec_List[i] as Mapping.PachMapReceiver.Map_Receiver).Direct_Time, Rec_List[0].Rec_List[i].Rho_C));
 
+                        sw.WriteLine("Octave band; energy histogram of each receiver:");
                         for (int Octave = 0; Octave < 8; Octave++)
                         {
                             double[] Hist = Rec_List[s].Rec_List[i].GetEnergyHistogram(Octave);
-                            sw.WriteLine("Octave band; energy level of each receiver:");
                             //directional or not directional
+                            string temp = (UInt32)Octave + ",";
                             for (int e = 0; e < Rec_List[s].SampleCT; e++)
                             {
-                                if (Directional)
+                                //foreach should be here
+                                foreach (double histe in Hist)
                                 {
-                                    //Write octave band (int); each directional value in the histogram (double) (double) (double), and each energy value in the histogram (double)
-                                    Hare.Geometry.Vector DirPos = Rec_List[s].Directions_Pos(Octave, e, i);
-                                    Hare.Geometry.Vector DirNeg = Rec_List[s].Directions_Neg(Octave, e, i);
-                                    sw.Write(Helper_Functions.ConvertToCSVString((UInt32)Octave, (Hist[e])));
-                                    sw.WriteLine(Helper_Functions.ConvertToCSVString(
-                                        DirPos.x, DirPos.y, DirPos.z,
-                                        DirNeg.x, DirNeg.y, DirNeg.z));
+                                    if (Directional)
+                                    {
+                                        //Write octave band (int); each directional value in the histogram (double) (double) (double), and each energy value in the histogram (double)
+                                        Hare.Geometry.Vector DirPos = Rec_List[s].Directions_Pos(Octave, e, i);
+                                        Hare.Geometry.Vector DirNeg = Rec_List[s].Directions_Neg(Octave, e, i);
+                                        temp += Helper_Functions.ConvertToCSVString(
+                                            DirPos.x, DirPos.y, DirPos.z,
+                                            DirNeg.x, DirNeg.y, DirNeg.z);
+                                        temp += ",";
+                                        temp += Hist[e];
+                                        temp += ",";
+                                        /*sw.Write(Helper_Functions.ConvertToCSVString((UInt32)Octave, (Hist[e])));
+                                        sw.WriteLine(Helper_Functions.ConvertToCSVString(
+                                            DirPos.x, DirPos.y, DirPos.z,
+                                            DirNeg.x, DirNeg.y, DirNeg.z));*/
+                                    }
+                                    else
+                                    {
+                                        //Write Octave (int) & each energy value in the histogram (double)...
+                                        //sw.WriteLine(Helper_Functions.ConvertToCSVString((UInt32)Octave, (Hist[e])));
+                                        {
+                                            temp += Hist[e];
+                                            temp += ",";
+                                        }
+                                    }
                                 }
-                                else
-                                {
-                                    //Write Octave (int) & each energy value in the histogram (double)...
-                                    sw.WriteLine(Helper_Functions.ConvertToCSVString((UInt32)Octave, (Hist[e])));
-                                }
+                                sw.WriteLine(temp);
                             }
                         }
                         sw.WriteLine("End_Receiver_Hits");
