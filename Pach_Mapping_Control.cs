@@ -168,7 +168,7 @@ namespace Pachyderm_Acoustic
                         SourceList.Items.Add(String.Format("S{0}-", S.Source_ID()) + S.Type());
                     }
 
-                    if (SavePath != null) Utilities.FileIO.Write_pachm(SavePath, Map);
+                    if (SavePath != null) Utilities.FileIO.Write_pachm(SavePath, ref Map);
                 }
 
                 if (Map != null)

@@ -7,7 +7,7 @@
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
 //'(at your option) any later version. 
-//'Pachyderm-Acoustic is distributed in the hope that it will be useful, 
+//'Pachyderm-Acoustic is distributed in the hope that it will be useful, public static void Write_Pac1
 //'but WITHOUT ANY WARRANTY; without even the implied warranty of 
 //'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
 //'GNU General Public License for more details. 
@@ -230,12 +230,12 @@ namespace Pachyderm_Acoustic
             public static void Write_pachm(Mapping.PachMapReceiver[] Rec_List)
             {
                 System.Windows.Forms.SaveFileDialog sf = new System.Windows.Forms.SaveFileDialog();
-                sf.DefaultExt = ".pachm";
+                sf.DefaultExt = ".csv";
                 sf.AddExtension = true;
-                sf.Filter = "Pachyderm Mapping Data File (*.pachm)|*.pachm|" + "All Files|";
+                sf.Filter = "Pachyderm Mapping Data File (*.csv)|*.csv|" + "All Files|";
                 if (sf.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    Write_pachm(sf.FileName, Rec_List);
+                    Write_pachm(sf.FileName, ref Rec_List);
                 }
             }
 
@@ -244,106 +244,141 @@ namespace Pachyderm_Acoustic
             /// </summary>
             /// <param name="filename">The location the new file is to be written to.</param>
             /// <param name="Rec_List">The list of receivers to be written.</param>
-            public static void Write_pachm(string filename, Mapping.PachMapReceiver[] Rec_List)
+            public static void Write_pachm(string filename, ref Mapping.PachMapReceiver[] Rec_List)
             {
-                System.IO.BinaryWriter sw = new System.IO.BinaryWriter(System.IO.File.Open(filename, System.IO.FileMode.Create));
+                // use Streamwriter to write to csv files 
+                System.IO.StreamWriter sw = System.IO.File.CreateText(filename);
                 //1. Write calculation type. (string)  
-                sw.Write(Rec_List[0].Data_Type());
+                sw.WriteLine("Calculation Tyle:");
+                sw.WriteLine(Rec_List[0].Data_Type());
                 Boolean Directional = Rec_List[0].Data_Type() == "Type;Map_Data";
                 //2. Write the number of samples in each histogram. (int)
-                sw.Write((UInt32)Rec_List[0].SampleCT);
-                //3. Write the sample rate. (int) 
-                sw.Write((UInt32)Rec_List[0].SampleRate);
+                sw.WriteLine("Number of samples in each histogram:"); 
+                sw.WriteLine((UInt32)Rec_List[0].SampleCT);
+                //3. Write the sample rate. (int)
+                sw.WriteLine("Sample Rate:");
+                sw.WriteLine((UInt32)Rec_List[0].SampleRate);
                 //4. Write the number of Receivers (int)
                 int Rec_Ct = Rec_List[0].Rec_List.Length;
-                sw.Write((UInt32)Rec_Ct);
+                sw.WriteLine("Number of Receivers:");
+                sw.WriteLine((UInt32)Rec_Ct);
                 //4.5 Announce the Version
-                sw.Write("Version");
-                sw.Write(UI.PachydermAc_PlugIn.Instance.Version);
+                sw.WriteLine("Version");
+                sw.WriteLine(UI.PachydermAc_PlugIn.Instance.Version);
                 //5. Announce that the following data pertains to the form of the analysis mesh. (string)
-                sw.Write("Mesh Information");
+                sw.WriteLine("Mesh Information:");
                 //6. Announce Mesh Vertices (string)
-                sw.Write("Mesh Vertices");
-                //Write the number of vertices & faces (int) (int)
-                sw.Write((UInt32)Rec_List[0].Map_Mesh.Vertices.Count);
-                sw.Write((UInt32)Rec_List[0].Map_Mesh.Faces.Count);
+                sw.WriteLine("Mesh Vertices:");
+                //Write the number of vertices (int) (int)
+                sw.WriteLine((UInt32)Rec_List[0].Map_Mesh.Vertices.Count);
 
                 for (int i = 0; i < Rec_List[0].Map_Mesh.Vertices.Count; i++)
                 {
                     //Write Vertex: (double) (double) (double)
-                    sw.Write(Rec_List[0].Map_Mesh.Vertices[i].X);
-                    sw.Write(Rec_List[0].Map_Mesh.Vertices[i].Y);
-                    sw.Write(Rec_List[0].Map_Mesh.Vertices[i].Z);    
+                    /*sw.WriteLine(Rec_List[0].Map_Mesh.Vertices[i].X);
+                    sw.WriteLine(Rec_List[0].Map_Mesh.Vertices[i].Y);
+                    sw.WriteLine(Rec_List[0].Map_Mesh.Vertices[i].Z); */
+                    string meshvertice = Helper_Functions.ConvertToCSVString(
+                        Rec_List[0].Map_Mesh.Vertices[i].X,
+                        Rec_List[0].Map_Mesh.Vertices[i].Y,
+                        Rec_List[0].Map_Mesh.Vertices[i].Z);
+                    sw.WriteLine(meshvertice);
                 }
                 //7. Announce Mesh Faces (string)
-                sw.Write("Mesh Faces");
+                sw.WriteLine("Mesh Faces:");
+                // Write the number of faces 
+                sw.WriteLine((UInt32)Rec_List[0].Map_Mesh.Faces.Count);
+
                 for (int i = 0; i < Rec_List[0].Map_Mesh.Faces.Count; i++)
                 {
                     // Write mesh vertex indices: (int) (int) (int) (int)
-                    sw.Write((UInt32)Rec_List[0].Map_Mesh.Faces[i][0]);
-                    sw.Write((UInt32)Rec_List[0].Map_Mesh.Faces[i][1]);
-                    sw.Write((UInt32)Rec_List[0].Map_Mesh.Faces[i][2]);
-                    sw.Write((UInt32)Rec_List[0].Map_Mesh.Faces[i][3]);
+                    /*sw.WriteLine((UInt32)Rec_List[0].Map_Mesh.Faces[i][0]);
+                    sw.WriteLine((UInt32)Rec_List[0].Map_Mesh.Faces[i][1]);
+                    sw.WriteLine((UInt32)Rec_List[0].Map_Mesh.Faces[i][2]);
+                    sw.WriteLine((UInt32)Rec_List[0].Map_Mesh.Faces[i][3]);*/
+                    string meshfaces = Helper_Functions.ConvertToCSVString(
+                        (UInt32)Rec_List[0].Map_Mesh.Faces[i][0],
+                        (UInt32)Rec_List[0].Map_Mesh.Faces[i][1],
+                        (UInt32)Rec_List[0].Map_Mesh.Faces[i][2],
+                        (UInt32)Rec_List[0].Map_Mesh.Faces[i][3]);
+                    sw.WriteLine(meshfaces);
                 }
                 //7.5: Announce the number of sources.
-                //sw.Write("Sources");
-                sw.Write("SourceswLoc");
-                sw.Write(Rec_List.Length);
+                //sw.WriteLine("Sources");
+                sw.WriteLine("Number of Receivers:");
+                sw.WriteLine(Rec_List.Length);
                 //7.5a: Announce the Type of Source
+                sw.WriteLine("Source Coordinate, Type, and delaytime in ms:");
                 for (int i = 0; i < Rec_List.Length; i++)
                 {
-                    ///////////////////////
-                    sw.Write(Rec_List[i].Src.X);
-                    sw.Write(Rec_List[i].Src.Y);
-                    sw.Write(Rec_List[i].Src.Z);
-                    ///////////////////////
-                    sw.Write(Rec_List[i].SrcType);
-                    sw.Write(Rec_List[i].delay_ms);//v.2.0.0.1
+                    /*
+                    sw.WriteLine(Rec_List[i].Src.X);
+                    sw.WriteLine(Rec_List[i].Src.Y);
+                    sw.WriteLine(Rec_List[i].Src.Z);
+                    //////////////////////*/
+                    sw.WriteLine(Helper_Functions.ConvertToCSVString(Rec_List[i].Src.X, Rec_List[i].Src.Y, Rec_List[i].Src.Z));
+                    sw.WriteLine(Rec_List[i].SrcType);
+                    sw.WriteLine(Rec_List[i].delay_ms);//v.2.0.0.1
                 }
 
                 //8. Announce that the following data pertains to the receiver histograms (string)
-                sw.Write("Receiver Hit Data");
+                sw.WriteLine("Receiver Hit Data:");
                 //8a. Announce whether or not data is linked to vertices rather than faces (bool)
-                sw.Write(Rec_List[0].Rec_Vertex);
-
+                sw.WriteLine("True: data is linked to vertices; False:data is linked to faces;");
+                sw.WriteLine(Rec_List[0].Rec_Vertex);
+                // this part need to be rewritten for readability//
                 for (int s = 0; s < Rec_List.Length; s++)
                 {
                     for (int i = 0; i < Rec_Ct; i++)
                     {
-                        //Write Receiver Index (int)
-                        sw.Write((UInt32)i);
-                        //Write the direct sound arrival time.
-                        sw.Write((Rec_List[s].Rec_List[i] as Mapping.PachMapReceiver.Map_Receiver).Direct_Time);
-                        //Write Impedance of Air
-                        sw.Write(Rec_List[0].Rec_List[i].Rho_C);
+                        //Write Receiver Index (int), direct sound arrival time,Impedance of Air
+                        sw.WriteLine("Receiver Index, Direct Sound Arrival Time, Air Impedance:");
+                        sw.WriteLine(Helper_Functions.ConvertToCSVString((UInt32)i, (Rec_List[s].Rec_List[i] as Mapping.PachMapReceiver.Map_Receiver).Direct_Time, Rec_List[0].Rec_List[i].Rho_C));
 
+                        sw.WriteLine("Octave band; energy histogram of each receiver:");
                         for (int Octave = 0; Octave < 8; Octave++)
                         {
-                            //Write Octave (int)
-                            sw.Write((UInt32)Octave);
                             double[] Hist = Rec_List[s].Rec_List[i].GetEnergyHistogram(Octave);
+                            //directional or not directional
+                            string temp = (UInt32)Octave + ",";
                             for (int e = 0; e < Rec_List[s].SampleCT; e++)
                             {
-                                //Write each energy value in the histogram (double)...
-                                sw.Write(Hist[e]);
-                                //Write each directional value in the histogram (double) (double) (double);
-                                if (Directional)
+                                //foreach should be here
+                                foreach (double histe in Hist)
                                 {
-                                    Hare.Geometry.Vector DirPos = Rec_List[s].Directions_Pos(Octave, e, i);
-                                    Hare.Geometry.Vector DirNeg = Rec_List[s].Directions_Neg(Octave, e, i);
-                                    sw.Write(DirPos.x);
-                                    sw.Write(DirPos.y);
-                                    sw.Write(DirPos.z);
-                                    sw.Write(DirNeg.x);
-                                    sw.Write(DirNeg.y);
-                                    sw.Write(DirNeg.z);
+                                    if (Directional)
+                                    {
+                                        //Write octave band (int); each directional value in the histogram (double) (double) (double), and each energy value in the histogram (double)
+                                        Hare.Geometry.Vector DirPos = Rec_List[s].Directions_Pos(Octave, e, i);
+                                        Hare.Geometry.Vector DirNeg = Rec_List[s].Directions_Neg(Octave, e, i);
+                                        temp += Helper_Functions.ConvertToCSVString(
+                                            DirPos.x, DirPos.y, DirPos.z,
+                                            DirNeg.x, DirNeg.y, DirNeg.z);
+                                        temp += ",";
+                                        temp += Hist[e];
+                                        temp += ",";
+                                        /*sw.Write(Helper_Functions.ConvertToCSVString((UInt32)Octave, (Hist[e])));
+                                        sw.WriteLine(Helper_Functions.ConvertToCSVString(
+                                            DirPos.x, DirPos.y, DirPos.z,
+                                            DirNeg.x, DirNeg.y, DirNeg.z));*/
+                                    }
+                                    else
+                                    {
+                                        //Write Octave (int) & each energy value in the histogram (double)...
+                                        //sw.WriteLine(Helper_Functions.ConvertToCSVString((UInt32)Octave, (Hist[e])));
+                                        {
+                                            temp += Hist[e];
+                                            temp += ",";
+                                        }
+                                    }
                                 }
+                                sw.WriteLine(temp);
                             }
                         }
-                        sw.Write("End_Receiver_Hits");
+                        sw.WriteLine("End_Receiver_Hits");
                     }
                 }
-                sw.Write("End_of_File");
+                sw.WriteLine("End_of_File");
                 sw.Close();
             }
 
